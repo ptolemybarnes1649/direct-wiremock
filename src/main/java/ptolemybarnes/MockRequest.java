@@ -255,15 +255,4 @@ public class MockRequest implements Request {
                 .get()
                 : null;
     }
-
-    public MockRequest multipartBody(String body) {
-        ContentTypeHeader contentTypeHeader = headers.getContentTypeHeader();
-        String contentType =
-                contentTypeHeader.isPresent()
-                        ? contentTypeHeader.firstValue()
-                        : "multipart/form-data; boundary=BOUNDARY";
-        this.multiparts = MultipartParser.parse(bytesFromString(body), contentType);
-
-        return this;
-    }
 }
