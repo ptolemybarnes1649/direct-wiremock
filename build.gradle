@@ -26,6 +26,8 @@ dependencies {
     implementation 'com.amazonaws:aws-lambda-java-runtime-interface-client:1.0.0'
     implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
     implementation "com.github.tomakehurst:wiremock-jre8:2.33.2"
+
+    runtimeOnly 'org.slf4j:slf4j-jdk14:1.7.36'
 }
 
 task copyRuntimeDependencies(type: Copy) {
