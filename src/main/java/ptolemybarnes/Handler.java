@@ -3,14 +3,17 @@ package ptolemybarnes;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
-import java.util.Map;
-
-public class Handler implements RequestHandler<Map<String,String>, String> {
+public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     @Override
-    public String handleRequest(Map<String,String> event, Context context) {
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         LambdaLogger logger = context.getLogger();
         logger.log("REQUEST RECEIVED");
-        return "test";
+
+        return new APIGatewayProxyResponseEvent()
+                .withStatusCode(201)
+                .withBody("this is a body");
     }
 }
