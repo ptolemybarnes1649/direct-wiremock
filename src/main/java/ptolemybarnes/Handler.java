@@ -9,6 +9,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.SingleRootFileSource;
 import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.direct.DirectCallHttpServer;
 import com.github.tomakehurst.wiremock.direct.DirectCallHttpServerFactory;
@@ -22,16 +23,16 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         LambdaLogger logger = context.getLogger();
         String inputPath = input.getPath();
-        logger.log("REQUEST RECEIVED " + inputPath);
+        logger.log("REQUEST RECEIVED " + input);
 
-        Response response = getWiremockResponse(inputPath);
+        Response response = getWiremockResponse(input);
 
         return new APIGatewayProxyResponseEvent()
                 .withStatusCode(response.getStatus())
                 .withBody(response.getBodyAsString());
     }
 
-    private Response getWiremockResponse(String inputPath) {
+    private Response getWiremockResponse(APIGatewayProxyRequestEvent request) {
         DirectCallHttpServerFactory factory = new DirectCallHttpServerFactory();
         var config = wireMockConfig().httpServerFactory(factory);
         config.fileSource(new SingleRootFileSource("wiremock"));
@@ -40,8 +41,13 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
 
         DirectCallHttpServer server = factory.getHttpServer();
 
-        Request request = mockRequest().method(POST).url(inputPath);
+        MockRequest requestToWiremock = mockRequest()
+                .method(RequestMethod.fromString(request.getHttpMethod()))
+                .url(request.getPath())
+                .body(request.getBody());
 
-        return server.stubRequest(request);
+        request.getHeaders().forEach(requestToWiremock::header);
+
+        return server.stubRequest(requestToWiremock);
     }
 }
